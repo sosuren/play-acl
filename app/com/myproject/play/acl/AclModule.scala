@@ -10,7 +10,7 @@ class AclModule extends AbstractModule {
 
   override def configure(): Unit = {
     install(new FactoryModuleBuilder().
-      implement(classOf[AccessDefinition], classOf[AccessDefinition]).
+      implement(classOf[AuthDefinition], classOf[AuthDefinition]).
       build(classOf[AclFactory])
     )
   }
@@ -18,5 +18,5 @@ class AclModule extends AbstractModule {
 
 trait AclFactory {
 
-  def createAuthDef(role: String, accessDefinition: AccessDefinition = AllowAll()): AuthDefinition
+  def createAuthDef(role: String, accessDefinition: AccessDefinition): AuthDefinition
 }

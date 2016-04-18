@@ -1,6 +1,6 @@
 package com.myproject.play
 
-import com.myproject.play.acl.{AuthDefinition, AclFactory}
+import com.myproject.play.acl.{AllowAll, AuthDefinition, AclFactory}
 import play.api.Play
 
 /**
@@ -10,7 +10,7 @@ object AuthDsl {
 
   object Identify {
 
-    def as(role: String): AuthDefinition = AuthDsl.aclFactory.createAuthDef(role)
+    def as(role: String): AuthDefinition = AuthDsl.aclFactory.createAuthDef(role, AllowAll())
   }
 
   val aclFactory: AclFactory = Play.current.injector.instanceOf(classOf[AclFactory])

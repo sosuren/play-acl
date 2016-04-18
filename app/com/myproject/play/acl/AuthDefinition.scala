@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
  * Created by Surendra on 4/15/16.
  */
-class AuthDefinition @Inject() (authenticatedAction: AuthenticatedAction, @Assisted() role: String, @Assisted() accessDef: AccessDefinition = AllowAll()) {
+class AuthDefinition @Inject() (authenticatedAction: AuthenticatedAction, @Assisted() role: String, @Assisted() accessDef: AccessDefinition) {
 
   def allowTo[A](accessDef: AccessDefinition) = AuthDsl.aclFactory.createAuthDef(role, accessDef)
 

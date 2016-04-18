@@ -1,5 +1,7 @@
 name := "play-acl"
 
+organization := "com.myproject"
+
 version := "1.0"
 
 scalaVersion := "2.11.7"

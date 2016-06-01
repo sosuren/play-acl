@@ -21,9 +21,12 @@ class AuthDefinition @Inject() (authenticatedAction: AuthenticatedAction, @Assis
   def in[A](bodyParser: BodyParser[A])(block: AuthenticatedRequest[A] => Future[Result]): Action[A] = authenticatedAction.async(bodyParser) { implicit request =>
 
     async {
-      await(accessDef.isAllowed(request.userId)) match {
+      request.role == role match { // check role matches
         case false => BadRequest
-        case true => await(block(request))
+        case true => await(accessDef.isAllowed(request.userId)) match { // check user passes access definition
+          case false => BadRequest
+          case true => await(block(request))
+        }
       }
     } recover {
       case NonFatal(e) => InternalServerError

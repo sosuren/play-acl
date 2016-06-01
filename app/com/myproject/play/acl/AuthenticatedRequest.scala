@@ -8,35 +8,38 @@ import play.api.mvc.Request
 trait AuthenticatedRequest[+A] extends Request[A]{
 
   val userId: Int
+  val role: String
 }
 
 object AuthenticatedRequest {
 
-  def apply[A](u: Int, r: Request[A]) = new AuthenticatedRequest[A] {
+  def apply[A](u: Int, r: String, req: Request[A]) = new AuthenticatedRequest[A] {
 
-    def body = r.body
+    def body = req.body
 
-    def headers = r.headers
+    def headers = req.headers
 
-    def id = r.id
+    def id = req.id
 
-    def method = r.method
+    def method = req.method
 
-    def path = r.path
+    def path = req.path
 
-    def queryString = r.queryString
+    def queryString = req.queryString
 
-    def remoteAddress = r.remoteAddress
+    def remoteAddress = req.remoteAddress
 
-    def secure = r.secure
+    def secure = req.secure
 
-    def tags = r.tags
+    def tags = req.tags
 
-    def uri = r.uri
+    def uri = req.uri
 
-    def version = r.version
+    def version = req.version
 
     val userId = u
+    
+    val role = r
   }
 }
 

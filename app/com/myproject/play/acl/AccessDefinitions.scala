@@ -4,19 +4,35 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
+ * This base class to create Access Control Rules
  * Created by Surendra on 4/15/16.
  */
 abstract class AccessDefinition {
 
+  /**
+   * This returns new Access Tree applying OR rule between them
+   * @param rule Next Access Definition rule to apply OR rule
+   * @return [[ORTree]]
+   */
   final def or(rule: AccessDefinition) = new ORTree(List(this, rule))
 
+  /**
+   * This returns new Access Tree applying AND rule between them
+   * @param rule Next Access Definition rule to apply AND rule
+   * @return [[ANDTree]]
+   */
   final def and(rule: AccessDefinition) = new ANDTree(List(this, rule))
 
+  /**
+   * Checks if the user passes this access definition
+   * @param userId ID of User
+   * @return Future of Boolean
+   */
   def isAllowed(userId: Int): Future[Boolean]
 }
 
 /**
- * Composed access definition
+ * Compose access definition
  * @param accessDefs List of access definitions
  */
 sealed abstract class AccessTree (accessDefs: List[AccessDefinition]) extends AccessDefinition

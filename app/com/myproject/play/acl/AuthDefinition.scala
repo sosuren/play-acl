@@ -22,9 +22,9 @@ class AuthDefinition @Inject() (authenticatedAction: AuthenticatedAction, @Assis
 
     async {
       request.role == role match { // check role matches
-        case false => BadRequest
+        case false => Unauthorized
         case true => await(accessDef.isAllowed(request.userId)) match { // check user passes access definition
-          case false => BadRequest
+          case false => Unauthorized
           case true => await(block(request))
         }
       }

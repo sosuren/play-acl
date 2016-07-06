@@ -40,3 +40,74 @@ play.modules.enabled += "com.myproject.play.acl.AclModule"
 play.modules.enabled += "PlayAclModule"
 ```
 
+## Access Right Composition
+
+You can actually create access rule separately and compose them.
+
+### Define Access Rule
+
+```scala
+import com.myproject.play.acl.AccessRule
+
+class IsOwner extends AccessRule {
+
+  override def apply(userId: Int): Future[Boolean] = Future { 
+    userId == 1 // your implementation goes here
+  }
+}
+
+class HasWriteRight(resourceId: Int) extends AccessRule {
+
+  override def apply(userId: Int): Future[Boolean] = Future {
+    // use id of resource and user id to find if user has write access to resource 
+    false // your implementation goes here
+  }
+}
+```
+
+### Use Access Rule
+
+```scala
+import com.myproject.play.AuthDsl._
+...
+
+class TestController @Inject() extends Controller {
+
+  /** only owner can access */
+  def test1() = Identify as Role.USER.toString allowTo IsOwner() in { request =>
+    Future.successful(Ok)
+  }
+  
+  /** Either owner or user having write right can access */
+  def test2(resId: Int) = Identify as Role.USER.toString allowTo (IsOwner() or HasWriteRight(resId)) in { request =>
+    Future.successful(Ok)
+  }
+}
+
+```
+
+### How to compose Access Rule?
+
+> OR rule
+
+Using `or` will give access to action if any of them returns true
+
+> AND rule
+
+Using `and` will only give access to action if all of them returns true
+
+> Multiple rule
+
+You can even compose to create complex rule like: `Rule1() or (Rule2() and Rule3())`
+
+## Benefits
+
+1. You can write authorisation code as sentence using `AuthDsl`
+
+For example look at this snippet: `Identify as Role.USER.toString allowTo (IsOwner() or HasWriteRight(resId)) in { ... }`
+It can be read as `Identify as user and allow to owner or having write right`
+
+2. Testings made easy
+
+You can test each access rule separately and later compose them to create complex rule
+

@@ -1,5 +1,7 @@
 package com.myproject.play.acl
 
+import java.security.cert.X509Certificate
+
 import play.api.mvc.Request
 
 /**
@@ -8,12 +10,11 @@ import play.api.mvc.Request
 trait AuthenticatedRequest[+A] extends Request[A]{
 
   val userId: Int
-  val role: String
 }
 
 object AuthenticatedRequest {
 
-  def apply[A](u: Int, r: String, req: Request[A]) = new AuthenticatedRequest[A] {
+  def apply[A](userIdArg: Int, req: Request[A]) = new AuthenticatedRequest[A] {
 
     def body = req.body
 
@@ -37,9 +38,9 @@ object AuthenticatedRequest {
 
     def version = req.version
 
-    val userId = u
-    
-    val role = r
+    def clientCertificateChain: Option[Seq[X509Certificate]] = req.clientCertificateChain
+
+    val userId: Int = userIdArg
   }
 }
 

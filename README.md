@@ -4,7 +4,8 @@ ACL for Play Framework [Scala]
 This is an authorisation library for Play Framework. You can manage access rights and compose them as well.
 
 ## Configuration
-1. Create custom authentication mechanism by implementing `AuthenticatedAction`:
+
+**1**. Create custom authentication mechanism by implementing `AuthenticatedAction`:
 
 
 ```scala
@@ -23,7 +24,7 @@ class UserAuthenticatedAction @Inject() (val authHandler: AuthHandler) extends A
 }
 ```
 
-2. Create Injector Module
+**2**. Create Injector Module
 
 ```scala
 class PlayAclModule extends AbstractModule {
@@ -34,7 +35,7 @@ class PlayAclModule extends AbstractModule {
 }
 ```
 
-3. Add injector module in config file (e.g. `application.conf`)
+**3**. Add injector module in config file (e.g. `application.conf`)
 ```
 play.modules.enabled += "com.myproject.play.acl.AclModule"
 play.modules.enabled += "PlayAclModule"
@@ -102,12 +103,12 @@ You can even compose to create complex rule like: `Rule1() or (Rule2() and Rule3
 
 ## Benefits
 
-1. You can write authorisation code as sentence using `AuthDsl`
+**1**. You can write authorisation code as sentence using `AuthDsl`
 
 For example look at this snippet: `Identify as Role.USER.toString allowTo (IsOwner() or HasWriteRight(resId)) in { ... }`
 It can be read as `Identify as user and allow to owner or having write right`
 
-2. Testings made easy
+**2**. Testings made easy
 
 You can test each access rule separately and later compose them to create complex rule
 

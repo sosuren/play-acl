@@ -11,7 +11,6 @@ lazy val playAcl = (project in file(".")).enablePlugins(PlayScala)
 libraryDependencies ++= Seq(
   cache,
   specs2 % Test,
-  "com.google.guava" % "guava-io" % "r03",
   "org.scala-lang.modules" %% "scala-async" % "0.9.4"
 )
 

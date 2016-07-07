@@ -1,7 +1,7 @@
 # play-acl
 ACL for Play Framework [Scala]
 
-This is an authorisation library for Play Framework 2.4.x. You can manage access rights and compose them as well.
+This is an authorisation library for Play Framework 2.5.x. You can manage access rights and compose them as well.
 
 ## Configuration
 

@@ -45,8 +45,10 @@ final class ORTree (val accessDefs: List[AccessDefinition]) extends AccessTree(a
 
   override def isAllowed(userId: Int): Future[Boolean] = {
     val futures = accessDefs map (_.isAllowed(userId))
-    Future.sequence(futures) map { flag =>
-      flag.foldLeft(false)(_ || _)
+    // returns first completed with value true else false
+    Future.find(futures){ v => v } map {
+      case None => false
+      case Some(_) => true
     }
   }
 }
@@ -59,8 +61,9 @@ final class ANDTree (val accessDefs: List[AccessDefinition]) extends AccessTree(
 
   override def isAllowed(userId: Int): Future[Boolean] = {
     val futures = accessDefs map (_.isAllowed(userId))
+    // returns true if all completed value is true else false
     Future.sequence(futures) map { flag =>
-      flag.foldLeft(true)(_ && _)
+      flag.forall(v => v)
     }
   }
 }

@@ -3,8 +3,7 @@ package com.myproject.play.acl
 import org.specs2.mock.Mockito
 import org.specs2.mutable._
 
-import scala.concurrent.Future
-import scala.concurrent.Await
+import scala.concurrent.{Awaitable, Future, Await}
 import scala.concurrent.duration._
 import scala.util.Random
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -12,6 +11,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
  * Created by Surendra on 6/1/16.
  */
 class AccessDefinitionsUnitTest extends Specification with Mockito {
+
+  def execTime[T](toWait: Awaitable[T], atMost: Duration): Long = {
+    val startTime = System.currentTimeMillis()
+    Await.result(toWait, atMost)
+    val endTime = System.currentTimeMillis()
+    endTime - startTime
+  }
 
   "ORTree" should {
 
@@ -38,6 +44,28 @@ class AccessDefinitionsUnitTest extends Specification with Mockito {
 
       Await.result(orTree.isAllowed(Random.nextInt), 2 seconds) must beFalse
     }
+
+    "return on first completed" in {
+
+      val firstCompletingThreadSleep = 300
+      val offsetSleep = 200
+
+      val accessDef1 = mock[AccessDefinition]
+      accessDef1.isAllowed(anyInt) returns Future {
+        Thread.sleep(firstCompletingThreadSleep)
+        true
+      }
+
+      val accessDef2 = mock[AccessDefinition]
+      accessDef2.isAllowed(anyInt) returns Future {
+        Thread.sleep(firstCompletingThreadSleep + offsetSleep + Random.nextLong())
+        true
+      }
+
+      val orTree = new ORTree(List(accessDef1, accessDef2))
+
+      execTime(orTree.isAllowed(Random.nextInt()), 2 seconds) must be_<=(firstCompletingThreadSleep + offsetSleep + 0L)
+     }
   }
 
   "AndTree" should {

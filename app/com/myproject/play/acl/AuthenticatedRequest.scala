@@ -38,8 +38,6 @@ object AuthenticatedRequest {
 
     def version = req.version
 
-    def clientCertificateChain: Option[Seq[X509Certificate]] = req.clientCertificateChain
-
     val userId: Int = userIdArg
   }
 }

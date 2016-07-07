@@ -1,7 +1,7 @@
 # play-acl
 ACL for Play Framework [Scala]
 
-This is an authorisation library for Play Framework. You can manage access rights and compose them as well.
+This is an authorisation library for Play Framework 2.4.x. You can manage access rights and compose them as well.
 
 ## Configuration
 
@@ -15,16 +15,16 @@ class UserAuthenticatedAction @Inject() (val authHandler: AuthHandler) extends A
 
   override def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[Result]): Future[Result] = {
     // use your own authentication mechanism here  
-    authHandler.getUserId(request.headers.get(AuthConst.HeaderCookie).getOrElse("")).flatMap {
+    authHandler.getUserId(request.headers.get("MyCookie").getOrElse("")).flatMap {
       case None => Future.successful(Unauthorized)
       case Some(userId) =>
-        block(AuthenticatedRequest[A](userId, Role.USER.toString, request))
+        block(AuthenticatedRequest[A](userId, request))
     }
   }
 }
 ```
 
-**2**. Create Injector Module
+**2**. Configure Injector Module
 
 ```scala
 class PlayAclModule extends AbstractModule {
@@ -33,12 +33,6 @@ class PlayAclModule extends AbstractModule {
     bind(classOf[AuthenticatedAction]).to(classOf[UserAuthenticatedAction])
   }
 }
-```
-
-**3**. Add injector module in config file (e.g. `application.conf`)
-```
-play.modules.enabled += "com.myproject.play.acl.AclModule"
-play.modules.enabled += "PlayAclModule"
 ```
 
 ## Access Right Composition
@@ -50,18 +44,18 @@ You can actually create access rule separately and compose them.
 ```scala
 import com.myproject.play.acl.AccessRule
 
-class IsOwner extends AccessRule {
+class Admin extends AccessRule {
 
   override def apply(userId: Int): Future[Boolean] = Future { 
     userId == 1 // your implementation goes here
   }
 }
 
-class HasWriteRight(resourceId: Int) extends AccessRule {
+class HasWriteAccess(resourceId: Int) extends AccessRule {
 
   override def apply(userId: Int): Future[Boolean] = Future {
     // use id of resource and user id to find if user has write access to resource 
-    false // your implementation goes here
+    resourceId == 2 && userId == 2 // your implementation goes here
   }
 }
 ```
@@ -69,18 +63,18 @@ class HasWriteRight(resourceId: Int) extends AccessRule {
 ### Use Access Rule
 
 ```scala
-import com.myproject.play.AuthDsl._
+import com.myproject.play.acl.AuthenticatedAction
 ...
 
-class TestController @Inject() extends Controller {
+class TestController @Inject() (authAxn: AuthenticatedAction) extends Controller {
 
-  /** only owner can access */
-  def test1() = Identify as Role.USER.toString allowTo IsOwner() in { request =>
+  /** only admin can access */
+  def test1() = authAxn allowTo Admin() in { request =>
     Future.successful(Ok)
   }
   
-  /** Either owner or user having write right can access */
-  def test2(resId: Int) = Identify as Role.USER.toString allowTo (IsOwner() or HasWriteRight(resId)) in { request =>
+  /** Either admin or user having write access */
+  def test2(resId: Int) = authAxn allowTo (IsOwner() or HasWriteAccess(resId)) in { request =>
     Future.successful(Ok)
   }
 }
@@ -103,10 +97,10 @@ You can even compose to create complex rule like: `Rule1() or (Rule2() and Rule3
 
 ## Benefits
 
-**1**. You can write authorisation code as sentence using `AuthDsl`
+**1**. Your access protection code is more readable
 
-For example look at this snippet: `Identify as Role.USER.toString allowTo (IsOwner() or HasWriteRight(resId)) in { ... }`
-It can be read as `Identify as user and allow to owner or having write right`
+For example look at this snippet: `authAxn allowTo (Admin() or HasWriteAccess(resId)) in { ... }`
+It can be read as `Authenticated Action should allow to Admin or Having Write Access`
 
 **2**. Testings made easy
 

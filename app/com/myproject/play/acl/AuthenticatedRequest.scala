@@ -9,12 +9,12 @@ import play.api.mvc.Request
  */
 trait AuthenticatedRequest[+A] extends Request[A]{
 
-  val userId: Int
+  val userId: Long
 }
 
 object AuthenticatedRequest {
 
-  def apply[A](userIdArg: Int, req: Request[A]) = new AuthenticatedRequest[A] {
+  def apply[A](userIdArg: Long, req: Request[A]) = new AuthenticatedRequest[A] {
 
     def body = req.body
 
@@ -40,7 +40,7 @@ object AuthenticatedRequest {
 
     def clientCertificateChain: Option[Seq[X509Certificate]] = req.clientCertificateChain
 
-    val userId: Int = userIdArg
+    val userId: Long = userIdArg
   }
 }
 

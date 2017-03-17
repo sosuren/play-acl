@@ -28,7 +28,7 @@ abstract class AccessDefinition {
    * @param userId ID of User
    * @return Future of Boolean
    */
-  def isAllowed(userId: Int): Future[Boolean]
+  def isAllowed(userId: Long): Future[Boolean]
 }
 
 /**
@@ -43,7 +43,7 @@ sealed abstract class AccessTree (accessDefs: List[AccessDefinition]) extends Ac
  */
 final class ORTree (val accessDefs: List[AccessDefinition]) extends AccessTree(accessDefs) {
 
-  override def isAllowed(userId: Int): Future[Boolean] = {
+  override def isAllowed(userId: Long): Future[Boolean] = {
     val futures = accessDefs map (_.isAllowed(userId))
     Future.sequence(futures) map { flag =>
       flag.foldLeft(false)(_ || _)
@@ -57,7 +57,7 @@ final class ORTree (val accessDefs: List[AccessDefinition]) extends AccessTree(a
  */
 final class ANDTree (val accessDefs: List[AccessDefinition]) extends AccessTree(accessDefs) {
 
-  override def isAllowed(userId: Int): Future[Boolean] = {
+  override def isAllowed(userId: Long): Future[Boolean] = {
     val futures = accessDefs map (_.isAllowed(userId))
     Future.sequence(futures) map { flag =>
       flag.foldLeft(true)(_ && _)
@@ -68,9 +68,9 @@ final class ANDTree (val accessDefs: List[AccessDefinition]) extends AccessTree(
 /**
  * Unit rule that can be executed
  */
-trait AccessRule extends AccessDefinition with Function[Int, Future[Boolean]] {
+trait AccessRule extends AccessDefinition with Function[Long, Future[Boolean]] {
 
-  override def isAllowed(userId: Int): Future[Boolean] = this(userId)
+  override def isAllowed(userId: Long): Future[Boolean] = this(userId)
 }
 
 /**
@@ -80,7 +80,7 @@ object AllowAll {
 
   class AllowAll extends AccessRule {
 
-    override def apply(v1: Int): Future[Boolean] = Future { true }
+    override def apply(v1: Long): Future[Boolean] = Future { true }
   }
 
   def apply() = new AllowAll()
